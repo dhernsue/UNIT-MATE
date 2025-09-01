@@ -1,6 +1,6 @@
 {
-  "name": "MY JODO • Calculator",
-  "short_name": "MY JODO",
+  "name": "UNIT MATE • Calculator",
+  "short_name": "UNIT MATE",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#1e1b4b",
