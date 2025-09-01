@@ -1,9 +1,16 @@
 {
-  "name": "UnitMate",
-  "short_name": "UnitMate",
+  "name": "MY JODO • Calculator",
+  "short_name": "MY JODO",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#0f172a",
-  "description": "UnitMate एक स्मार्ट और colorful Calculator है।"
+  "background_color": "#1e1b4b",
+  "theme_color": "#1e1b4b",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo-150x150.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    }
+  ]
 }
