@@ -1,193 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UnitMate • Calculator</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .app {
-      background: #111;
-      padding: 15px;
-      border-radius: 20px;
-      box-shadow: 0px 0px 20px rgba(0,255,200,0.3);
-      width: 320px;
-    }
-    .display {
-      background: black;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-    }
-    .display h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-    .display p {
-      margin: 3px 0;
-    }
-    .unit-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .unit-buttons button {
-      flex: 1;
-      margin: 2px;
-      padding: 8px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      color: white;
-      background: #333;
-    }
-    .unit-buttons button.active {
-      background: #00c3ff;
-    }
-    .keys {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    .keys button {
-      padding: 15px;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      background: #222;
-      color: white;
-    }
-    .keys button:active {
-      background: #555;
-    }
-    .keys .ac {
-      background: linear-gradient(45deg, red, orange);
-      font-weight: bold;
-    }
-    .keys .eq {
-      background: linear-gradient(45deg, #00ff99, #00c3ff);
-      font-weight: bold;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MY JODO • Calculator</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --key:#1f2937;
+    --ok:#22c55e;
+    --danger:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Segoe UI,Roboto,Arial}
+  body{
+    height:100vh;display:flex;justify-content:center;align-items:center;background:#1e1b4b;
+  }
+  .app{width:100%;height:100%;background:#111;padding:14px;display:flex;flex-direction:column;gap:12px;}
+  .total{background:#000;padding:20px;border-radius:18px;font-size:20px;font-weight:bold;line-height:1.5em;
+    box-shadow:inset 0 0 15px rgba(0,255,255,0.15);min-height:120px;}
+  .total .title{color:#fff;font-size:22px;display:block;margin-bottom:8px;}
+  .total .line{color:#0ff;font-size:18px;margin:2px 0;}
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .tab{padding:14px;font-weight:600;border-radius:12px;border:0;color:#fff;background:#333;transition:0.2s;font-size:16px}
+  .tab.active{background:linear-gradient(45deg,#06f,#0ff);}
+  .display{background:#000;padding:16px;border-radius:14px;min-height:80px;display:flex;flex-direction:column;justify-content:center;
+    box-shadow:inset 0 0 12px rgba(255,255,255,0.08);}
+  .trail{font-size:18px;color:#ccc;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .value{font-size:32px;font-weight:bold;color:#00ff00}
+  .pad{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start}
+  .key{border:0;padding:20px;font-size:22px;font-weight:bold;border-radius:14px;background:var(--key);color:#fff;transition:all 0.15s ease;}
+  .key.ok{background:linear-gradient(45deg,#00ffcc,#00ff66);color:#000}
+  .key.danger{background:linear-gradient(45deg,#ff416c,#ff4b2b);}
+  .key:active{transform:scale(0.9);box-shadow:0 0 20px #0ff, 0 0 40px #f0f;}
+</style>
 </head>
 <body>
-  <div class="app">
-    <div class="display">
-      <h2>TOTAL</h2>
-      <p style="color:cyan;">Meter: <span id="meter">0</span></p>
-      <p style="color:lime;">Inch: <span id="inch">0</span></p>
-      <h2 id="current">0</h2>
-    </div>
+<div class="app">
 
-    <div class="unit-buttons">
-      <button data-unit="mm" class="active">mm</button>
-      <button data-unit="inch">Inch</button>
-      <button data-unit="foot">Foot</button>
-      <button data-unit="meter">Meter</button>
-    </div>
-
-    <div class="keys">
-      <button class="ac">AC</button>
-      <button data-op="÷">÷</button>
-      <button data-op="×">×</button>
-      <button data-op="-">-</button>
-      <button>7</button>
-      <button>8</button>
-      <button>9</button>
-      <button data-op="+">+</button>
-      <button>4</button>
-      <button>5</button>
-      <button>6</button>
-      <button class="eq">=</button>
-      <button>1</button>
-      <button>2</button>
-      <button>3</button>
-      <button>.</button>
-      <button style="grid-column: span 4;">0</button>
-    </div>
+  <!-- ✅ TOTAL Screen -->
+  <div class="total" id="total">
+    <span class="title">TOTAL</span>
+    <div class="line">Meter: 0</div>
+    <div class="line">Foot: 0</div>
+    <div class="line">Inch: 0</div>
+    <div class="line">MM: 0</div>
   </div>
 
-  <script>
-    const meterEl = document.getElementById("meter");
-    const inchEl = document.getElementById("inch");
-    const currentEl = document.getElementById("current");
-    const unitBtns = document.querySelectorAll(".unit-buttons button");
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-unit="mm">mm</button>
+    <button class="tab" data-unit="inch">Inch</button>
+    <button class="tab" data-unit="foot">Foot</button>
+    <button class="tab" data-unit="meter">Meter</button>
+  </div>
 
-    let currentUnit = "mm";
-    let expression = "";
+  <!-- Display -->
+  <div class="display">
+    <div class="trail" id="trail">0</div>
+    <div class="value" id="value">0</div>
+  </div>
 
-    // unit conversion table (to meter)
-    const toMeter = {
-      mm: v => v / 1000,
-      inch: v => v * 0.0254,
-      foot: v => v * 0.3048,
-      meter: v => v
-    };
+  <!-- Keypad -->
+  <div class="pad">
+    <button class="key danger" data-act="ac">AC</button>
+    <button class="key" data-act="mul">×</button>
+    <button class="key" data-act="div">÷</button>
+    <button class="key" data-num="1">1</button>
+    <button class="key" data-num="2">2</button>
+    <button class="key" data-act="sub">−</button>
+    <button class="key" data-num="3">3</button>
+    <button class="key" data-num="4">4</button>
+    <button class="key" data-act="add">+</button>
+    <button class="key" data-num="5">5</button>
+    <button class="key" data-num="6">6</button>
+    <button class="key ok" data-act="eq">=</button>
+    <button class="key" data-num="7">7</button>
+    <button class="key" data-num="8">8</button>
+    <button class="key" data-num="9">9</button>
+    <button class="key" data-num="0">0</button>
+    <button class="key" data-act="dot">.</button>
+    <button class="key" data-act="back">⌫</button>
+  </div>
+</div>
 
-    // from meter conversion
-    const fromMeter = {
-      mm: v => v * 1000,
-      inch: v => v / 0.0254,
-      foot: v => v / 0.3048,
-      meter: v => v
-    };
+<script>
+/* ✅ Conversion */
+const U={mm:{toMM:v=>v,fromMM:v=>v},inch:{toMM:v=>v*25.4,fromMM:v=>v/25.4},foot:{toMM:v=>v*304.8,fromMM:v=>v/304.8},meter:{toMM:v=>v*1000,fromMM:v=>v/1000}};
+let currentUnit='mm',typing='',expressionMM='',expressionPretty='',lastOp='',resultShown=false;
+const safeOps={add:'+',sub:'-',mul:'*',div:'/'};
+const tabs=document.querySelectorAll('.tab'),trailEl=document.getElementById('trail'),valueEl=document.getElementById('value'),totalEl=document.getElementById('total');
 
-    // change unit
-    unitBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        unitBtns.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentUnit = btn.dataset.unit;
-      });
-    });
+/* ✅ Dialpad Sound (Web Audio API) */
+const ctx=new (window.AudioContext||window.webkitAudioContext)();
+function playTone(f1,f2,duration=150){
+  const osc1=ctx.createOscillator(),osc2=ctx.createOscillator(),gain=ctx.createGain();
+  osc1.type=osc2.type="sine";osc1.frequency.value=f1;osc2.frequency.value=f2;
+  gain.gain.value=0.2;
+  osc1.connect(gain);osc2.connect(gain);gain.connect(ctx.destination);
+  osc1.start();osc2.start();
+  setTimeout(()=>{osc1.stop();osc2.stop();},duration);
+}
+const DTMF={
+  "1":[697,1209],"2":[697,1336],"3":[697,1477],
+  "4":[770,1209],"5":[770,1336],"6":[770,1477],
+  "7":[852,1209],"8":[852,1336],"9":[852,1477],
+  "0":[941,1336]
+};
 
-    // keypad handling
-    document.querySelectorAll(".keys button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const text = btn.textContent;
+/* ✅ Breakdown function */
+function showTotals(mm){
+  if(!isFinite(mm))return;
+  let meters=Math.floor(mm/1000);
+  let remainMM=mm-(meters*1000);
 
-        if (btn.classList.contains("ac")) {
-          expression = "";
-          currentEl.textContent = "0";
-          meterEl.textContent = "0";
-          inchEl.textContent = "0";
-          return;
-        }
-        if (btn.classList.contains("eq")) {
-          try {
-            let value = eval(expression.replace(/×/g, "*").replace(/÷/g, "/"));
-            // convert to meter
-            let meters = toMeter[currentUnit](value);
-            meterEl.textContent = meters.toFixed(2);
-            inchEl.textContent = fromMeter["inch"](meters).toFixed(2);
-            currentEl.textContent = value + " " + currentUnit;
-          } catch {
-            currentEl.textContent = "Error";
-          }
-          return;
-        }
-        if (btn.dataset.op) {
-          expression += btn.dataset.op;
-          currentEl.textContent = expression;
-          return;
-        }
-        expression += text;
-        currentEl.textContent = expression;
-      });
-    });
-  </script>
+  let feet=Math.floor(remainMM/304.8);
+  remainMM-=feet*304.8;
+
+  let inches=Math.floor(remainMM/25.4);
+  remainMM-=inches*25.4;
+
+  let finalMM=Math.round(remainMM);
+
+  totalEl.innerHTML=`
+    <span class="title">TOTAL</span>
+    <div class="line">Meter: ${meters}</div>
+    <div class="line">Foot: ${feet}</div>
+    <div class="line">Inch: ${inches}</div>
+    <div class="line">MM: ${finalMM}</div>
+  `;
+}
+
+function render(){trailEl.textContent=expressionPretty||'0';valueEl.textContent=typing?(typing+' '+currentUnit):(resultShown?'':0);}
+function fmt(n){return (+n).toLocaleString(undefined,{maximumFractionDigits:6});}
+function commitTypedNumber(){
+  if(!typing)return false;
+  const n=parseFloat(typing);if(!isFinite(n))return false;
+  const asMM=U[currentUnit].toMM(n);
+  if(!expressionMM){expressionMM='('+asMM+')';expressionPretty=`${fmt(n)} ${currentUnit}`;}
+  else if(lastOp){expressionMM+=lastOp+'('+asMM+')';expressionPretty+=' '+lastOp+' '+`${fmt(n)} ${currentUnit}`;lastOp='';}
+  else{expressionMM='('+asMM+')';expressionPretty=`${fmt(n)} ${currentUnit}`;}
+  typing='';return true;
+}
+
+/* ✅ Tabs */
+tabs.forEach(btn=>btn.addEventListener('click',()=>{tabs.forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentUnit=btn.dataset.unit;render();}));
+
+/* ✅ Keypad */
+document.querySelectorAll('.key').forEach(k=>{
+  k.addEventListener('click',()=>{
+    const num=k.dataset.num,act=k.dataset.act;
+    if(num!==undefined && DTMF[num]){playTone(DTMF[num][0],DTMF[num][1]);}
+    else{playTone(350,1000,100);}
+    if(num!==undefined){if(resultShown){expressionMM='';expressionPretty='';resultShown=false;}typing=(typing==='0')?num:(typing+num);render();return;}
+    switch(act){
+      case 'dot':if(!typing.includes('.'))typing=typing?typing+'.':'0.';render();break;
+      case 'back':typing=typing.slice(0,-1);render();break;
+      case 'ac':typing='';expressionMM='';expressionPretty='';lastOp='';resultShown=false;render();showTotals(0);break;
+      case 'add':case 'sub':case 'mul':case 'div':commitTypedNumber();lastOp=safeOps[act];expressionPretty+=' '+lastOp+' ';render();break;
+      case 'eq':
+        commitTypedNumber();if(!expressionMM)return;let mmResult=0;
+        try{if(!/^[0-9.+\-*/() ]+$/.test(expressionMM))throw 0;mmResult=Function('return ('+expressionMM+')')();}
+        catch{mmResult=NaN}
+        resultShown=true;
+        if(isFinite(mmResult)){showTotals(mmResult);valueEl.textContent=`${fmt(mmResult)} mm`;trailEl.textContent=expressionPretty+' = '+fmt(mmResult)+' mm';}
+        else{valueEl.textContent='Error';}
+        expressionMM=isFinite(mmResult)?'('+mmResult+')':'';expressionPretty=isFinite(mmResult)?`${fmt(mmResult)} mm`:'';lastOp='';typing='';break;
+    }
+  });
+});
+
+render();showTotals(0);
+</script>
 </body>
-        </html>
+</html>
