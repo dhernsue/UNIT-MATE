@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MY JODO • Calculator</title>
+<title>UNIT MATE • Calculator</title>
+
+<!-- ✅ PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e1b4b">
+
 <style>
   :root{
     --bg:#0f172a;
@@ -90,7 +95,7 @@ let currentUnit='mm',typing='',expressionMM='',expressionPretty='',lastOp='',res
 const safeOps={add:'+',sub:'-',mul:'*',div:'/'};
 const tabs=document.querySelectorAll('.tab'),trailEl=document.getElementById('trail'),valueEl=document.getElementById('value'),totalEl=document.getElementById('total');
 
-/* ✅ Dialpad Sound (Web Audio API, stable) */
+/* ✅ Dialpad Sound (Web Audio API) */
 const ctx=new (window.AudioContext||window.webkitAudioContext)();
 function playTone(f1,f2,duration=150){
   const osc1=ctx.createOscillator(),osc2=ctx.createOscillator(),gain=ctx.createGain();
@@ -134,9 +139,8 @@ tabs.forEach(btn=>btn.addEventListener('click',()=>{tabs.forEach(b=>b.classList.
 document.querySelectorAll('.key').forEach(k=>{
   k.addEventListener('click',()=>{
     const num=k.dataset.num,act=k.dataset.act;
-    // 🔊 Play dial tone if number key
     if(num!==undefined && DTMF[num]){playTone(DTMF[num][0],DTMF[num][1]);}
-    else{playTone(350,1000,100);} // operators के लिए simple beep
+    else{playTone(350,1000,100);} 
 
     if(num!==undefined){if(resultShown){expressionMM='';expressionPretty='';resultShown=false;}typing=(typing==='0')?num:(typing+num);render();return;}
     switch(act){
@@ -157,6 +161,13 @@ document.querySelectorAll('.key').forEach(k=>{
 });
 
 render();showTotals(0);
+
+/* ✅ Service Worker Register */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+  .then(reg=>console.log("Service Worker Registered"))
+  .catch(err=>console.log("SW failed",err));
+}
 </script>
 </body>
-    </html>
+</html>
