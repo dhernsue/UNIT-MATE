@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UnitMate • Calculator</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .app {
+      background: #111;
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0px 0px 20px rgba(0,255,200,0.3);
+      width: 320px;
+    }
+    .display {
+      background: black;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .display h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .display p {
+      margin: 3px 0;
+    }
+    .unit-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .unit-buttons button {
+      flex: 1;
+      margin: 2px;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: #333;
+    }
+    .unit-buttons button.active {
+      background: #00c3ff;
+    }
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .keys button {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #222;
+      color: white;
+    }
+    .keys button:active {
+      background: #555;
+    }
+    .keys .ac {
+      background: linear-gradient(45deg, red, orange);
+      font-weight: bold;
+    }
+    .keys .eq {
+      background: linear-gradient(45deg, #00ff99, #00c3ff);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="display">
+      <h2>TOTAL</h2>
+      <p style="color:cyan;">Meter: <span id="meter">0</span></p>
+      <p style="color:lime;">Inch: <span id="inch">0</span></p>
+      <h2 id="current">0</h2>
+    </div>
+
+    <div class="unit-buttons">
+      <button data-unit="mm" class="active">mm</button>
+      <button data-unit="inch">Inch</button>
+      <button data-unit="foot">Foot</button>
+      <button data-unit="meter">Meter</button>
+    </div>
+
+    <div class="keys">
+      <button class="ac">AC</button>
+      <button data-op="÷">÷</button>
+      <button data-op="×">×</button>
+      <button data-op="-">-</button>
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button data-op="+">+</button>
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button class="eq">=</button>
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>.</button>
+      <button style="grid-column: span 4;">0</button>
+    </div>
+  </div>
+
+  <script>
+    const meterEl = document.getElementById("meter");
+    const inchEl = document.getElementById("inch");
+    const currentEl = document.getElementById("current");
+    const unitBtns = document.querySelectorAll(".unit-buttons button");
+
+    let currentUnit = "mm";
+    let expression = "";
+
+    // unit conversion table (to meter)
+    const toMeter = {
+      mm: v => v / 1000,
+      inch: v => v * 0.0254,
+      foot: v => v * 0.3048,
+      meter: v => v
+    };
+
+    // from meter conversion
+    const fromMeter = {
+      mm: v => v * 1000,
+      inch: v => v / 0.0254,
+      foot: v => v / 0.3048,
+      meter: v => v
+    };
+
+    // change unit
+    unitBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        unitBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentUnit = btn.dataset.unit;
+      });
+    });
+
+    // keypad handling
+    document.querySelectorAll(".keys button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const text = btn.textContent;
+
+        if (btn.classList.contains("ac")) {
+          expression = "";
+          currentEl.textContent = "0";
+          meterEl.textContent = "0";
+          inchEl.textContent = "0";
+          return;
+        }
+        if (btn.classList.contains("eq")) {
+          try {
+            let value = eval(expression.replace(/×/g, "*").replace(/÷/g, "/"));
+            // convert to meter
+            let meters = toMeter[currentUnit](value);
+            meterEl.textContent = meters.toFixed(2);
+            inchEl.textContent = fromMeter["inch"](meters).toFixed(2);
+            currentEl.textContent = value + " " + currentUnit;
+          } catch {
+            currentEl.textContent = "Error";
+          }
+          return;
+        }
+        if (btn.dataset.op) {
+          expression += btn.dataset.op;
+          currentEl.textContent = expression;
+          return;
+        }
+        expression += text;
+        currentEl.textContent = expression;
+      });
+    });
+  </script>
+</body>
+        </html>
