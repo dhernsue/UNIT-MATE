@@ -3,32 +3,27 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MY JODO • Calculator</title>
+<title>UNIT-MATE • Calculator</title>
 <style>
-  :root{
-    --bg:#0f172a;
-    --key:#1f2937;
-    --ok:#22c55e;
-    --danger:#ef4444;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Segoe UI,Roboto,Arial}
   body{
-    height:100vh;display:flex;justify-content:center;align-items:center;background:#1e1b4b;
+    height:100vh;display:flex;justify-content:center;align-items:center;
+    background:#1e1b4b;margin:0;font-family:Segoe UI,Arial;
   }
-  .app{width:100%;height:100%;background:#111;padding:14px;display:flex;flex-direction:column;gap:12px;}
-  .total{background:#000;padding:20px;border-radius:18px;font-size:20px;font-weight:bold;line-height:1.5em;
-    box-shadow:inset 0 0 15px rgba(0,255,255,0.15);min-height:120px;}
-  .total .title{color:#fff;font-size:22px;display:block;margin-bottom:8px;}
-  .total .line{color:#0ff;font-size:18px;margin:2px 0;}
+  .app{width:100%;max-width:420px;background:#111;padding:14px;display:flex;flex-direction:column;gap:12px;border-radius:14px;}
+  .total{background:#000;padding:20px;border-radius:18px;font-size:22px;font-weight:bold;line-height:1.6em;
+    box-shadow:inset 0 0 15px rgba(0,255,255,0.15);min-height:90px;}
+  .total .title{color:#fff;font-size:22px;display:block;margin-bottom:6px;}
+  .total .meter{color:#00ffff;display:block;font-size:20px;}
+  .total .inch{color:#00ff00;display:block;font-size:20px;}
   .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
   .tab{padding:14px;font-weight:600;border-radius:12px;border:0;color:#fff;background:#333;transition:0.2s;font-size:16px}
   .tab.active{background:linear-gradient(45deg,#06f,#0ff);}
   .display{background:#000;padding:16px;border-radius:14px;min-height:80px;display:flex;flex-direction:column;justify-content:center;
     box-shadow:inset 0 0 12px rgba(255,255,255,0.08);}
   .trail{font-size:18px;color:#ccc;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .value{font-size:32px;font-weight:bold;color:#00ff00}
+  .value{font-size:36px;font-weight:bold;color:#00ff00}
   .pad{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start}
-  .key{border:0;padding:20px;font-size:22px;font-weight:bold;border-radius:14px;background:var(--key);color:#fff;transition:all 0.15s ease;}
+  .key{border:0;padding:20px;font-size:22px;font-weight:bold;border-radius:14px;background:#1f2937;color:#fff;transition:all 0.15s ease;}
   .key.ok{background:linear-gradient(45deg,#00ffcc,#00ff66);color:#000}
   .key.danger{background:linear-gradient(45deg,#ff416c,#ff4b2b);}
   .key:active{transform:scale(0.9);box-shadow:0 0 20px #0ff, 0 0 40px #f0f;}
@@ -40,10 +35,8 @@
   <!-- ✅ TOTAL Screen -->
   <div class="total" id="total">
     <span class="title">TOTAL</span>
-    <div class="line">Meter: 0</div>
-    <div class="line">Foot: 0</div>
-    <div class="line">Inch: 0</div>
-    <div class="line">MM: 0</div>
+    <span class="meter">Meter: <span class="num">0</span></span>
+    <span class="inch">Inch: <span class="num">0</span></span>
   </div>
 
   <!-- Tabs -->
@@ -85,52 +78,29 @@
 
 <script>
 /* ✅ Conversion */
-const U={mm:{toMM:v=>v,fromMM:v=>v},inch:{toMM:v=>v*25.4,fromMM:v=>v/25.4},foot:{toMM:v=>v*304.8,fromMM:v=>v/304.8},meter:{toMM:v=>v*1000,fromMM:v=>v/1000}};
+const U={
+  mm:{toMM:v=>v,fromMM:v=>v},
+  inch:{toMM:v=>v*25.4,fromMM:v=>v/25.4},
+  foot:{toMM:v=>v*304.8,fromMM:v=>v/304.8},
+  meter:{toMM:v=>v*1000,fromMM:v=>v/1000}
+};
 let currentUnit='mm',typing='',expressionMM='',expressionPretty='',lastOp='',resultShown=false;
 const safeOps={add:'+',sub:'-',mul:'*',div:'/'};
 const tabs=document.querySelectorAll('.tab'),trailEl=document.getElementById('trail'),valueEl=document.getElementById('value'),totalEl=document.getElementById('total');
 
-/* ✅ Dialpad Sound (Web Audio API) */
-const ctx=new (window.AudioContext||window.webkitAudioContext)();
-function playTone(f1,f2,duration=150){
-  const osc1=ctx.createOscillator(),osc2=ctx.createOscillator(),gain=ctx.createGain();
-  osc1.type=osc2.type="sine";osc1.frequency.value=f1;osc2.frequency.value=f2;
-  gain.gain.value=0.2;
-  osc1.connect(gain);osc2.connect(gain);gain.connect(ctx.destination);
-  osc1.start();osc2.start();
-  setTimeout(()=>{osc1.stop();osc2.stop();},duration);
+/* ✅ Render */
+function render(){
+  trailEl.textContent=expressionPretty||'0';
+  valueEl.textContent=typing?(typing+' '+currentUnit):(resultShown?'':0);
 }
-const DTMF={
-  "1":[697,1209],"2":[697,1336],"3":[697,1477],
-  "4":[770,1209],"5":[770,1336],"6":[770,1477],
-  "7":[852,1209],"8":[852,1336],"9":[852,1477],
-  "0":[941,1336]
-};
-
-/* ✅ Breakdown function */
 function showTotals(mm){
   if(!isFinite(mm))return;
-  let meters=Math.floor(mm/1000);
-  let remainMM=mm-(meters*1000);
-
-  let feet=Math.floor(remainMM/304.8);
-  remainMM-=feet*304.8;
-
-  let inches=Math.floor(remainMM/25.4);
-  remainMM-=inches*25.4;
-
-  let finalMM=Math.round(remainMM);
-
-  totalEl.innerHTML=`
-    <span class="title">TOTAL</span>
-    <div class="line">Meter: ${meters}</div>
-    <div class="line">Foot: ${feet}</div>
-    <div class="line">Inch: ${inches}</div>
-    <div class="line">MM: ${finalMM}</div>
-  `;
+  let meters=(mm/1000).toFixed(2);
+  let inches=(mm/25.4).toFixed(2);
+  totalEl.innerHTML=`<span class="title">TOTAL</span>
+    <span class="meter">Meter: <span class="num">${meters}</span></span>
+    <span class="inch">Inch: <span class="num">${inches}</span></span>`;
 }
-
-function render(){trailEl.textContent=expressionPretty||'0';valueEl.textContent=typing?(typing+' '+currentUnit):(resultShown?'':0);}
 function fmt(n){return (+n).toLocaleString(undefined,{maximumFractionDigits:6});}
 function commitTypedNumber(){
   if(!typing)return false;
@@ -149,8 +119,6 @@ tabs.forEach(btn=>btn.addEventListener('click',()=>{tabs.forEach(b=>b.classList.
 document.querySelectorAll('.key').forEach(k=>{
   k.addEventListener('click',()=>{
     const num=k.dataset.num,act=k.dataset.act;
-    if(num!==undefined && DTMF[num]){playTone(DTMF[num][0],DTMF[num][1]);}
-    else{playTone(350,1000,100);}
     if(num!==undefined){if(resultShown){expressionMM='';expressionPretty='';resultShown=false;}typing=(typing==='0')?num:(typing+num);render();return;}
     switch(act){
       case 'dot':if(!typing.includes('.'))typing=typing?typing+'.':'0.';render();break;
