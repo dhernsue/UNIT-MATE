@@ -1,4 +1,4 @@
-   ]{
+{
   "name": "UnitMate",
   "short_name": "UnitMate",
   "start_url": "./index.html",
@@ -6,4 +6,4 @@
   "background_color": "#000000",
   "theme_color": "#0f172a",
   "description": "UnitMate एक स्मार्ट और colorful Calculator है।"
-   }
+}
